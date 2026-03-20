@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm danh mục</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader('Thêm danh mục', null, ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-secondary" href="/categories">Quay lại</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <form class="form-card" th:action="@{/categories/add}" th:object="${category}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div class="form-grid">
+            <div class="field">
+                <label class="field__label" for="name">Tên</label>
+                <input id="name" type="text" th:field="*{name}" required
+                       class="field__control" th:classappend="${#fields.hasErrors('name')} ? ' is-error' : ''">
+                <p class="field__error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+            </div>
+            <div class="field">
+                <label class="field__label" for="parent">Danh mục cha</label>
+                <select id="parent" class="field__control" th:field="*{parent.id}">
+                    <option value="">Không có</option>
+                    <option th:each="p : ${parents}" th:value="${p.id}" th:text="${p.name}"></option>
+                </select>
+            </div>
+            <div class="field span-2">
+                <label class="field__label" for="imageUrl">Hình ảnh (URL)</label>
+                <input id="imageUrl" type="url" th:field="*{imageUrl}" placeholder="https://..." class="field__control">
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Lưu</button>
+            <a class="btn btn-secondary" href="/categories">Huỷ</a>
+        </div>
+    </form>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tra cuu diem tich luy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader('Tra cuu diem tich luy', 'Nhap so dien thoai de xem diem', ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-secondary" href="/products">Quay lai mua sam</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <div class="reward-grid">
+        <section class="card card-pad">
+            <h3 class="checkout-section-title">Tra cuu diem</h3>
+            <form action="/rewards/lookup" method="post" class="reward-form">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="field">
+                    <label class="field__label" for="phone">So dien thoai</label>
+                    <input class="field__control" type="tel" id="phone" name="phone" th:value="${phone}" placeholder="Nhap so dien thoai" required>
+                </div>
+                <button class="btn btn-primary" type="submit">Tra cuu</button>
+            </form>
+            <p class="field__help">Luu y: chi truy cap duoc bang tai khoan cua chinh ban.</p>
+        </section>
+
+        <section class="card card-pad" th:if="${lookupDone}">
+            <h3 class="checkout-section-title">Thong tin diem</h3>
+            <div class="reward-points">
+                <span>Diem hien co</span>
+                <strong th:text="${#numbers.formatInteger(userPoints, 0, 'POINT') + ' diem'}"></strong>
+            </div>
+
+            <div class="reward-voucher">
+                <strong th:text="${voucher.title}"></strong>
+                <p th:text="${'Yeu cau: ' + voucher.requiredPoints + ' diem'}"></p>
+                <p th:text="${'Ma voucher: ' + voucher.code}"></p>
+            </div>
+
+            <div class="alert alert-info" th:if="${voucherAvailable}">
+                <div class="alert__content">
+                    <p class="alert__title">Ban da co voucher</p>
+                    <p class="alert__body" th:text="${'Voucher hien tai: ' + voucher.code}"></p>
+                </div>
+            </div>
+
+            <div class="reward-actions">
+                <form action="/rewards/send-otp" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="phone" th:value="${phone}">
+                    <button class="btn btn-secondary" type="submit">Gui OTP</button>
+                </form>
+                <form action="/rewards/redeem" method="post" class="reward-redeem">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="phone" th:value="${phone}">
+                    <div class="field">
+                        <label class="field__label" for="otp">Nhap OTP</label>
+                        <input class="field__control" type="text" id="otp" name="otp" maxlength="6" placeholder="6 chu so" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit" th:disabled="${!canRedeem}">
+                        Doi voucher
+                    </button>
+                </form>
+            </div>
+
+            <p class="field__help" th:if="${!canRedeem}">
+                Ban can du diem va chua co voucher de doi.
+            </p>
+        </section>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

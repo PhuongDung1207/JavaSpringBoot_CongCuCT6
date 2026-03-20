@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách sản phẩm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader('Danh sách sản phẩm','Quản lý sản phẩm', ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-primary" href="/products/new" sec:authorize="hasAnyAuthority('ADMIN','MANAGER')">Thêm sản phẩm</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <div th:if="${#lists.isEmpty(products)}" class="card card-pad">
+        <div class="empty-state">
+            <p class="empty-state__title">Chưa có sản phẩm</p>
+            <p class="empty-state__desc">Thêm sản phẩm đầu tiên để bắt đầu quản lý danh sách.</p>
+            <a class="btn btn-primary" href="/products/new" sec:authorize="hasAnyAuthority('ADMIN','MANAGER')">Thêm sản phẩm</a>
+        </div>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(products)}" class="card card--table">
+        <table class="table table--zebra">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th class="is-center">Ảnh</th>
+                <th>Tên</th>
+                <th class="is-right">Giá</th>
+                <th>Danh mục</th>
+                <th>Khuyến mãi</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${products}">
+                <td th:text="${p.id}"></td>
+                <td class="is-center">
+                    <img class="thumb" th:if="${!#strings.isEmpty(p.imageUrl)}" th:src="${p.imageUrl}" alt="" width="72" height="72">
+                    <div class="thumb" th:unless="${!#strings.isEmpty(p.imageUrl)}"></div>
+                </td>
+                <td>
+                    <a th:href="@{'/products/' + ${p.id}}" th:text="${p.name}"></a>
+                </td>
+                <td class="is-right" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + '₫'"></td>
+                <td th:text="${p.category != null ? p.category.name : 'Chưa gán'}"></td>
+                <td>
+                    <span th:if="${p.promotionType != null and p.promotionType.name() == 'DISCOUNT'}"
+                          class="badge badge-danger" th:text="${'Giảm ' + p.discountPercent + '%'}"></span>
+                    <span th:if="${p.promotionType != null and p.promotionType.name() == 'GIFT'}"
+                          class="badge badge-success" th:text="${'Tặng: ' + p.giftDescription}"></span>
+                    <span th:if="${p.promotionType == null or p.promotionType.name() == 'NONE'}">-</span>
+                </td>
+                <td>
+                    <div class="table__actions" sec:authorize="hasAnyAuthority('ADMIN','MANAGER')">
+                        <a class="btn btn-secondary btn-sm" th:href="@{'/products/edit/' + ${p.id}}">Sửa</a>
+                        <a class="btn btn-danger btn-sm js-confirm" th:href="@{'/products/delete/' + ${p.id}}"
+                           th:attr="data-confirm=${'Bạn có chắc muốn xoá “' + p.name + '” ?'}">Xoá</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

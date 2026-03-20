@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="site-footer">
+    <div>© 2026 PhuongDung Shop - Tham khảo giao diện TheGioiDiDong</div>
+</footer>
+<script>
+    (function () {
+        document.addEventListener('click', function (e) {
+            var t = e.target;
+            if (!t) return;
+            var a = t.closest ? t.closest('a.js-confirm') : null;
+            if (!a) return;
+            var msg = a.getAttribute('data-confirm') || 'Bạn có chắc muốn thực hiện thao tác này?';
+            if (!window.confirm(msg)) {
+                e.preventDefault();
+            }
+        });
+    })();
+</script>
+</body>
+</html>

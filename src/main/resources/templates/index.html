@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>PhuongDung Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .nav{display:flex;gap:12px;padding:8px 16px;background:#fff;border-bottom:1px solid #eee}
+        .nav a{padding:6px 8px;border-radius:4px;background:#f7f7f7}
+        .original-price { font-size: 14px; color: #999; margin-left: 5px; text-decoration: line-through; }
+    </style>
+ </head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <section class="hero-banner">
+        <img src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/f2/e7/f2e7548a58710c27a7e9e78e878a695e.jpg" alt="Banner">
+    </section>
+    <main class="container">
+        <div class="home-block" th:if="${!#lists.isEmpty(discountProducts)}">
+            <div class="block-head">
+                <h2>Khuyến mãi</h2>
+                <a href="/products">Xem tất cả</a>
+            </div>
+            <div class="product-grid">
+                <div class="item" th:each="p, stat : ${discountProducts}" th:attr="data-id=${p.id},data-pos=${stat.index + 1}">
+                    <a th:href="@{'/products/' + ${p.id}}" class="main-contain" tabindex="0">
+                        <div class="item-img">
+                            <img loading="lazy" th:if="${p.imageUrl}" th:src="${p.imageUrl}" th:attr="alt=${p.name}" width="207" height="207">
+                        </div>
+                        <h3 th:text="${p.name}"></h3>
+                        <div class="price-and-discount">
+                            <strong class="price" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + '₫'"></strong>
+                            <del class="original-price" th:if="${p.originalPrice != null and p.originalPrice > p.price}" th:text="${#numbers.formatDecimal(p.originalPrice, 0, 'POINT', 0, 'POINT')} + '₫'"></del>
+                            <div class="promo-text discount" th:text="${'-' + p.discountPercent + '%'}"></div>
+                        </div>
+                        <div class="fs-contain" th:if="${p.promotionQuantity > 0}">
+                             <div class="rq_count">Còn <span th:text="${p.promotionQuantity}"></span> suất</div>
+                             <div class="fs-iconfire"></div>
+                        </div>
+                    </a>
+                    <div class="btn-buy">
+                        <a th:href="@{'/products/' + ${p.id}}" class="buy-now" tabindex="0">Mua ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-block" th:if="${!#lists.isEmpty(giftProducts)}">
+            <div class="block-head">
+                <h2>Quà tặng</h2>
+                <a href="/products">Xem tất cả</a>
+            </div>
+            <div class="product-grid">
+                <div class="item" th:each="p, stat : ${giftProducts}" th:attr="data-id=${p.id},data-pos=${stat.index + 1}">
+                    <a th:href="@{'/products/' + ${p.id}}" class="main-contain" tabindex="0">
+                        <div class="item-img">
+                            <img loading="lazy" th:if="${p.imageUrl}" th:src="${p.imageUrl}" th:attr="alt=${p.name}" width="207" height="207">
+                        </div>
+                        <h3 th:text="${p.name}"></h3>
+                        <strong class="price" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + '₫'"></strong>
+                        <div class="promo-text gift" th:text="${'Tặng: ' + p.giftDescription}"></div>
+                        <div class="fs-contain" th:if="${p.promotionQuantity > 0}">
+                             <div class="rq_count" style="color: #0f766e">Còn <span th:text="${p.promotionQuantity}"></span> quà tặng</div>
+                        </div>
+                    </a>
+                    <div class="btn-buy">
+                        <a th:href="@{'/products/' + ${p.id}}" class="buy-now" tabindex="0">Mua ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-block" th:if="${!#lists.isEmpty(nonePromotionProducts)}">
+            <div class="block-head">
+                <h2>Không khuyến mãi</h2>
+                <a href="/products">Xem tất cả</a>
+            </div>
+            <div class="product-grid">
+                <div class="item" th:each="p, stat : ${nonePromotionProducts}" th:attr="data-id=${p.id},data-pos=${stat.index + 1}">
+                    <a th:href="@{'/products/' + ${p.id}}" class="main-contain" tabindex="0">
+                        <div class="item-img">
+                            <img loading="lazy" th:if="${p.imageUrl}" th:src="${p.imageUrl}" th:attr="alt=${p.name}" width="207" height="207">
+                        </div>
+                        <h3 th:text="${p.name}"></h3>
+                        <strong class="price" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + '₫'"></strong>
+                        <div class="promo-text none">Không khuyến mãi</div>
+                    </a>
+                    <div class="btn-buy">
+                        <a th:href="@{'/products/' + ${p.id}}" class="buy-now" tabindex="0">Mua ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

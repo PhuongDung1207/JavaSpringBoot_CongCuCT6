@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý thành phần danh mục</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader('Danh mục con','Quản lý thành phần danh mục', ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-primary" href="/categories/children/add">Thêm danh mục con</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <div th:if="${#lists.isEmpty(children)}" class="card card-pad">
+        <div class="empty-state">
+            <p class="empty-state__title">Chưa có danh mục con</p>
+            <p class="empty-state__desc">Tạo danh mục con để phân loại sản phẩm.</p>
+            <a class="btn btn-primary" href="/categories/children/add">Thêm danh mục con</a>
+        </div>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(children)}" class="card card--table">
+        <table class="table table--zebra">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên</th>
+                <th>Danh mục cha</th>
+                <th class="is-center">Hình</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${children}">
+                <td th:text="${c.id}"></td>
+                <td th:text="${c.name}"></td>
+                <td th:text="${c.parent != null ? c.parent.name : '—'}"></td>
+                <td class="is-center">
+                    <img class="thumb thumb--sm" th:if="${c.imageUrl}" th:src="${c.imageUrl}" alt="" width="40" height="40">
+                    <div class="thumb thumb--sm" th:unless="${c.imageUrl}"></div>
+                </td>
+                <td>
+                    <div class="table__actions">
+                        <a class="btn btn-secondary btn-sm" th:href="@{'/categories/children/edit/' + ${c.id}}">Sửa</a>
+                        <a class="btn btn-danger btn-sm js-confirm" th:href="@{'/categories/children/delete/' + ${c.id}}"
+                           th:attr="data-confirm=${'Bạn có chắc muốn xoá “' + c.name + '” ?'}">Xoá</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

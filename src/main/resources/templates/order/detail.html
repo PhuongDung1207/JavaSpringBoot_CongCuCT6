@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết đơn hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .detail-page-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .detail-page-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title" th:text="'Chi tiết đơn hàng #' + ${order.id}"></h1>
+            <p class="page-subtitle" th:text="'Ngày đặt: ' + ${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></p>
+        </div>
+        <div class="page-actions">
+            <a class="btn btn-secondary" href="/order/history">Quay lại lịch sử</a>
+        </div>
+    </div>
+
+    <div class="detail-page-grid">
+        <!-- Cột trái: Danh sách sản phẩm -->
+        <div class="card card-pad">
+            <h3 class="checkout-section-title">Sản phẩm đã mua</h3>
+            <div class="checkout-items">
+                <div class="checkout-item" th:each="detail : ${order.orderDetails}">
+                    <img class="thumb thumb--sm" th:if="${!#strings.isEmpty(detail.product.imageUrl)}" th:src="${detail.product.imageUrl}" alt="">
+                    <div class="thumb thumb--sm" th:unless="${!#strings.isEmpty(detail.product.imageUrl)}"></div>
+                    
+                    <div class="checkout-item__content">
+                        <p class="checkout-item__name">
+                            <a th:href="@{'/products/' + ${detail.product.id}}" th:text="${detail.product.name}" style="color: inherit; text-decoration: none;"></a>
+                        </p>
+                        <p class="checkout-item__meta">
+                            <span th:text="'Số lượng: ' + ${detail.quantity}"></span>
+                            <span th:text="'Đơn giá: ' + ${#numbers.formatDecimal(detail.price, 0, 'POINT', 0, 'POINT')} + 'đ'"></span>
+                        </p>
+                    </div>
+                    
+                    <strong class="checkout-item__price"
+                            th:text="${#numbers.formatDecimal(detail.price * detail.quantity, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                </div>
+            </div>
+            
+            <div class="checkout-total" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee;">
+                <div class="checkout-total__line" th:if="${order.voucherCode != null}">
+                    <span th:text="${'Voucher (' + order.voucherCode + ')'}"></span>
+                    <strong th:text="${'-' + #numbers.formatDecimal(order.voucherDiscount, 0, 'POINT', 0, 'POINT') + 'd'}"></strong>
+                </div>
+                <div class="checkout-total__line checkout-total__line--grand">
+                    <span>Tổng thanh toán</span>
+                    <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thông tin đơn hàng -->
+        <div class="card card-pad">
+            <h3 class="checkout-section-title">Thông tin đơn hàng</h3>
+            
+            <div class="mb-12">
+                <div class="text-muted" style="font-size: 13px;">Trạng thái đơn hàng</div>
+                <span th:class="${'badge ' + (order.status == 'PAID' ? 'badge-success' : (order.status == 'CANCELLED' ? 'badge-danger' : 'badge-warning'))}"
+                      th:text="${order.status == 'PAID' ? 'Đã thanh toán' : (order.status == 'PENDING' ? 'Chờ xử lý' : (order.status == 'PENDING_PAYMENT' ? 'Chờ thanh toán' : order.status))}">
+                </span>
+            </div>
+
+            <div class="mb-12">
+                <div class="text-muted" style="font-size: 13px;">Phương thức thanh toán</div>
+                <strong th:text="${order.paymentMethod == 'COD' ? 'Thanh toán khi nhận hàng (COD)' : (order.paymentMethod == 'MoMo' ? 'Ví MoMo' : order.paymentMethod)}"></strong>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+
+            <h3 class="checkout-section-title" style="font-size: 16px;">Thông tin người nhận</h3>
+            <div class="mb-8">
+                <strong>Họ tên:</strong> <br>
+                <span th:text="${order.customerName}"></span>
+            </div>
+            <div class="mb-8">
+                <strong>Số điện thoại:</strong> <br>
+                <span th:text="${order.phone}"></span>
+            </div>
+            <div class="mb-8" th:if="${order.email != null and !#strings.isEmpty(order.email)}">
+                <strong>Email:</strong> <br>
+                <span th:text="${order.email}"></span>
+            </div>
+            <div class="mb-8">
+                <strong>Địa chỉ:</strong> <br>
+                <span th:text="${order.address}"></span>
+            </div>
+            <div class="mb-8" th:if="${!#strings.isEmpty(order.note)}">
+                <strong>Ghi chú:</strong>
+                <p style="margin: 4px 0; font-style: italic; color: #666;" th:text="${order.note}"></p>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

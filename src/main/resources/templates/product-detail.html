@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name}">Chi tiết sản phẩm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader(${product.name}, 'Chi tiết sản phẩm', ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-secondary" href="/products">Quay lại</a>
+            <a class="btn btn-secondary" th:href="@{'/products/edit/' + ${product.id}}" sec:authorize="hasAnyAuthority('ADMIN','MANAGER')">Sửa</a>
+            <a class="btn btn-danger js-confirm" th:href="@{'/products/delete/' + ${product.id}}" sec:authorize="hasAnyAuthority('ADMIN','MANAGER')"
+               th:attr="data-confirm=${'Bạn có chắc muốn xoá “' + product.name + '” ?'}">Xoá</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <div class="card card-pad">
+        <div class="detail-grid">
+            <div>
+                <img class="detail-image" th:if="${!#strings.isEmpty(product.imageUrl)}" th:src="${product.imageUrl}" alt="">
+                <div class="detail-image" th:unless="${!#strings.isEmpty(product.imageUrl)}"></div>
+            </div>
+            <div>
+                <div class="detail-price" th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'POINT')} + ' ₫'"></div>
+
+                <div th:if="${product.promotionType != null and product.promotionType.name() == 'DISCOUNT'}"
+                     class="badge badge-danger">
+                    <span>Giảm</span>
+                    <span th:text="${product.discountPercent}"></span>
+                    <span>%</span>
+                </div>
+                <div th:if="${product.promotionType != null and product.promotionType.name() == 'DISCOUNT' and product.promotionQuantity > 0}"
+                     style="color: #d0021b; font-weight: bold; margin-top: 4px; font-size: 14px;">
+                    <span>🔥 Chỉ còn </span>
+                    <span th:text="${product.promotionQuantity}"></span>
+                    <span> suất ưu đãi!</span>
+                </div>
+                <div th:if="${product.promotionType != null and product.promotionType.name() == 'GIFT'}"
+                     class="badge badge-success">
+                    <span>Tặng:</span>
+                    <span th:text="${product.giftDescription}"></span>
+                </div>
+
+                <p class="field__help" th:text="${product.category != null ? product.category.name : 'Chưa gán'}"></p>
+                <p th:text="${product.description}"></p>
+                <form action="/cart/add" method="post" class="checkout-add-form" sec:authorize="hasAnyAuthority('USER','ADMIN')">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <label class="field__label" for="quantity">Số lượng</label>
+                    <div class="checkout-add-row">
+                        <input class="field__control checkout-qty-input" id="quantity" type="number" name="quantity" min="1" value="1">
+                        <button class="btn btn-primary" type="submit">Thêm vào giỏ hàng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

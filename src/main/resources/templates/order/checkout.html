@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán đơn hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud checkout-page">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container checkout-wrap">
+    <div class="checkout-heading">
+        <h1>Thanh toán đơn hàng</h1>
+        <p>Vui lòng điền thông tin để hoàn tất đặt hàng</p>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <div th:if="${#lists.isEmpty(cartItems)}" class="card card-pad">
+        <div class="empty-state">
+            <p class="empty-state__title">Giỏ hàng đang trống</p>
+            <p class="empty-state__desc">Bạn chưa có sản phẩm nào để thanh toán.</p>
+            <a class="btn btn-primary" href="/products">Mua sắm ngay</a>
+        </div>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(cartItems)}" class="checkout-grid">
+        <section class="checkout-form card card-pad">
+            <h2 class="checkout-section-title">Thông tin người nhận</h2>
+            <form action="/order/checkout" method="post" class="checkout-fields">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="field span-2">
+                    <label class="field__label" for="receiverName">Họ và tên *</label>
+                    <input class="field__control" type="text" name="receiverName" id="receiverName" required>
+                </div>
+                <div class="field">
+                    <label class="field__label" for="phone">Số điện thoại *</label>
+                    <input class="field__control" type="tel" name="phone" id="phone" required>
+                </div>
+                <div class="field">
+                    <label class="field__label" for="email">Email</label>
+                    <input class="field__control" type="email" name="email" id="email">
+                </div>
+                <div class="field span-2">
+                    <label class="field__label" for="address">Địa chỉ giao hàng *</label>
+                    <input class="field__control" type="text" name="address" id="address" required>
+                </div>
+                <div class="field span-2">
+                    <label class="field__label">Ghi chú (tùy chọn)</label>
+                    <textarea class="field__control" name="note" rows="2"></textarea>
+                </div>
+                <div class="field span-2">
+                    <label class="field__label">Phương thức thanh toán</label>
+                    <div class="payment-methods">
+                        <label class="payment-method">
+                            <input type="radio" name="paymentMethod" value="COD" checked>
+                            <span class="payment-content">
+                                <strong>Thanh toán khi nhận hàng (COD)</strong>
+                                <small>Bạn chỉ phải thanh toán khi nhận được hàng</small>
+                            </span>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="paymentMethod" value="MoMo">
+                            <span class="payment-content">
+                                <strong>Thanh toán qua Ví MoMo</strong>
+                                <small>Thanh toán trực tuyến an toàn, tiện lợi</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="field span-2">
+                    <div class="reward-box">
+                        <span>Điểm tích lũy dự kiến</span>
+                        <strong th:text="${'+' + #numbers.formatInteger(rewardPoints, 0, 'POINT') + ' điểm'}"></strong>
+                        <small>15.000đ = 2 điểm (không tính phí vận chuyển)</small>
+                    </div>
+                </div>
+                <div class="field span-2" th:if="${voucherAvailable}">
+                    <div class="voucher-box">
+                        <div>
+                            <strong th:text="${voucher.title}"></strong>
+                            <p th:text="${'Ma: ' + voucher.code + ' - Giam ' + #numbers.formatDecimal(voucher.discountAmount, 0, 'POINT', 0, 'POINT') + 'd'}"></p>
+                        </div>
+                        <label class="voucher-apply">
+                            <input type="checkbox" name="applyVoucher" value="true">
+                            <span>Ap dung voucher cho don hang</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="field span-2" th:unless="${voucherAvailable}">
+                    <div class="voucher-box">
+                        <div>
+                            <strong>Chua co voucher</strong>
+                            <p>Tra cuu diem tich luy de doi voucher.</p>
+                        </div>
+                        <a class="btn btn-secondary" href="/rewards/lookup">Tra cuu diem</a>
+                    </div>
+                </div>
+                <div class="form-actions span-2">
+                    <a class="btn btn-secondary" href="/products">Tiếp tục mua sắm</a>
+                    <button class="btn btn-primary checkout-submit" type="submit">Hoàn tất đặt hàng</button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="checkout-summary card card-pad">
+            <h2 class="checkout-section-title">Đơn hàng của bạn</h2>
+            <div class="checkout-items">
+                <div class="checkout-item" th:each="item : ${cartItems}">
+                    <img class="thumb thumb--sm" th:if="${!#strings.isEmpty(item.product.imageUrl)}" th:src="${item.product.imageUrl}" alt="">
+                    <div class="thumb thumb--sm" th:unless="${!#strings.isEmpty(item.product.imageUrl)}"></div>
+                    <div class="checkout-item__content">
+                        <p class="checkout-item__name" th:text="${item.product.name}"></p>
+                        <p class="checkout-item__meta">
+                            <span th:text="${'Số lượng: ' + item.quantity}"></span>
+                            <a class="checkout-remove" th:href="@{'/cart/remove/' + ${item.product.id}}">Xóa</a>
+                        </p>
+                        
+                        <div th:if="${cartPricingMap != null and cartPricingMap.containsKey(item.product.id)}" 
+                             th:with="pricing=${cartPricingMap.get(item.product.id)}">
+                             <div th:if="${pricing.discountedQuantity > 0 and pricing.regularQuantity > 0}" style="font-size: 12px; margin-top: 4px;">
+                                <div style="color: #d0021b;">• <span th:text="${pricing.discountedQuantity}"></span> x <span th:text="${#numbers.formatDecimal(pricing.discountedUnitPrice, 0, 'POINT', 0, 'POINT') + 'đ'}"></span> (Giá sốc)</div>
+                                <div style="color: #666;">• <span th:text="${pricing.regularQuantity}"></span> x <span th:text="${#numbers.formatDecimal(pricing.originalUnitPrice, 0, 'POINT', 0, 'POINT') + 'đ'}"></span> (Giá gốc)</div>
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${cartPricingMap != null and cartPricingMap.containsKey(item.product.id)}" 
+                         th:with="pricing=${cartPricingMap.get(item.product.id)}" style="text-align: right;">
+                        <strong class="checkout-item__price"
+                                th:text="${#numbers.formatDecimal(pricing.lineTotal, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                        <div th:if="${pricing.discountAmount > 0}" style="font-size: 12px; color: #999; text-decoration: line-through;"
+                             th:text="${#numbers.formatDecimal(pricing.originalUnitPrice * item.quantity, 0, 'POINT', 0, 'POINT')} + 'đ'"></div>
+                    </div>
+                    <div th:unless="${cartPricingMap != null and cartPricingMap.containsKey(item.product.id)}">
+                         <strong class="checkout-item__price"
+                            th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-total">
+                <div class="checkout-total__line">
+                    <span>Tạm tính</span>
+                    <strong th:text="${#numbers.formatDecimal(subtotal, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                </div>
+                <div class="checkout-total__line">
+                    <span>Phí vận chuyển</span>
+                    <strong th:if="${freeShipping}" class="is-free">Miễn phí</strong>
+                    <strong th:unless="${freeShipping}" th:text="${#numbers.formatDecimal(shippingFee, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                </div>
+                <div class="checkout-total__line" th:if="${voucherAvailable}">
+                    <span>Voucher (neu ap dung)</span>
+                    <strong th:text="${'-' + #numbers.formatDecimal(voucher.discountAmount, 0, 'POINT', 0, 'POINT') + 'd'}"></strong>
+                </div>
+                <div class="checkout-total__line reward-line">
+                    <span>Điểm tích lũy dự kiến</span>
+                    <strong th:text="${'+' + #numbers.formatInteger(rewardPoints, 0, 'POINT') + ' điểm'}"></strong>
+                </div>
+                <div class="checkout-total__line checkout-total__line--grand">
+                    <span>Tổng cộng</span>
+                    <strong th:text="${#numbers.formatDecimal(grandTotal, 0, 'POINT', 0, 'POINT')} + 'đ'"></strong>
+                </div>
+                <p class="checkout-note">Miễn phí vận chuyển khi tạm tính từ 1.000.000đ và tổng số lượng từ 2 sản phẩm.</p>
+            </div>
+        </aside>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

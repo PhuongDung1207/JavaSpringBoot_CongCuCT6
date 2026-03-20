@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách danh mục</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader('Danh mục', 'Tổng quan danh mục', ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-primary" href="/categories/add">Thêm danh mục</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <section th:each="pc : ${parents}" class="card card-pad mb-12">
+        <div class="page-header mb-8">
+            <h2 class="page-title title-h2" th:text="${pc.name}"></h2>
+            <div class="page-actions">
+                <a class="btn btn-secondary btn-sm" th:href="@{'/categories/edit/' + ${pc.id}}">Sửa</a>
+                <a class="btn btn-danger btn-sm js-confirm" th:href="@{'/categories/delete/' + ${pc.id}}"
+                   th:attr="data-confirm=${'Bạn có chắc muốn xoá “' + pc.name + '” ?'}">Xoá</a>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(pc.children)}" class="empty-state">
+            <p class="empty-state__desc">Chưa có danh mục con.</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(pc.children)}" class="card card--table">
+            <table class="table table--zebra">
+                <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th class="is-center">Hình</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${pc.children}">
+                    <td th:text="${c.name}"></td>
+                    <td class="is-center">
+                        <img class="thumb thumb--sm" th:if="${c.imageUrl}" th:src="${c.imageUrl}" alt="" width="40" height="40">
+                        <div class="thumb thumb--sm" th:unless="${c.imageUrl}"></div>
+                    </td>
+                    <td>
+                        <div class="table__actions">
+                            <a class="btn btn-secondary btn-sm" th:href="@{'/categories/edit/' + ${c.id}}">Sửa</a>
+                            <a class="btn btn-danger btn-sm js-confirm" th:href="@{'/categories/delete/' + ${c.id}}"
+                               th:attr="data-confirm=${'Bạn có chắc muốn xoá “' + c.name + '” ?'}">Xoá</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

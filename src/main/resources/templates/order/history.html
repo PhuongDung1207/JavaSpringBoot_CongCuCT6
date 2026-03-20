@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch sử đơn hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="page-crud">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container page">
+    <div th:replace="~{fragments/ui :: pageHeader('Lịch sử đơn hàng', 'Danh sách các đơn hàng đã đặt', ~{::actions})}">
+        <div th:fragment="actions">
+            <a class="btn btn-primary" href="/products">Tiếp tục mua sắm</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/ui :: alerts}"></div>
+
+    <div class="card card--table">
+        <table class="table table--zebra">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Người nhận</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Ngày đặt</th>
+                <th>Chi tiết</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(orders)}">
+                <td colspan="7" class="empty-state">Chưa có đơn hàng nào.</td>
+            </tr>
+            <tr th:each="order : ${orders}">
+                <td>
+                    <strong th:text="${'#' + order.id}"></strong>
+                </td>
+                <td>
+                    <div th:text="${order.customerName}"></div>
+                    <small class="text-muted" th:text="${order.phone}"></small>
+                </td>
+                <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'POINT') + 'đ'}"></td>
+                <td th:text="${order.paymentMethod}"></td>
+                <td>
+                    <span th:class="${'badge ' + (order.status == 'PAID' ? 'badge-success' : (order.status == 'CANCELLED' ? 'badge-danger' : 'badge-warning'))}"
+                          th:text="${order.status == 'PAID' ? 'Đã thanh toán' : (order.status == 'PENDING' ? 'Chờ xử lý' : (order.status == 'PENDING_PAYMENT' ? 'Chờ thanh toán' : order.status))}">
+                    </span>
+                </td>
+                <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <a class="btn btn-sm btn-secondary" th:href="@{'/order/detail/' + ${order.id}}">Xem chi tiết</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

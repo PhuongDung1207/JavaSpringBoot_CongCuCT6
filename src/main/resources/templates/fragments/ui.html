@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="alerts">
+    <div th:if="${!#strings.isEmpty(successMessage)}" class="alert alert-success" role="status" aria-live="polite">
+        <div class="alert__content">
+            <p class="alert__title">Thành công</p>
+            <p class="alert__body" th:text="${successMessage}"></p>
+        </div>
+    </div>
+    <div th:if="${!#strings.isEmpty(errorMessage)}" class="alert alert-error" role="alert" aria-live="assertive">
+        <div class="alert__content">
+            <p class="alert__title">Có lỗi</p>
+            <p class="alert__body" th:text="${errorMessage}"></p>
+        </div>
+    </div>
+    <div th:if="${!#strings.isEmpty(infoMessage)}" class="alert alert-info" role="status" aria-live="polite">
+        <div class="alert__content">
+            <p class="alert__title">Thông tin</p>
+            <p class="alert__body" th:text="${infoMessage}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="page-header" th:fragment="pageHeader(title, subtitle, actionsFrag)">
+    <div>
+        <p class="page-subtitle" th:if="${!#strings.isEmpty(subtitle)}" th:text="${subtitle}"></p>
+        <h1 class="page-title" th:text="${title}"></h1>
+    </div>
+    <div class="page-actions" th:replace="${actionsFrag}"></div>
+</div>
+</body>
+</html>

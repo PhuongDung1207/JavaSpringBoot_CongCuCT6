@@ -1,0 +1,224 @@
+﻿<header class="header v2024 theme-lunaryear hasbanner sticky1" th:fragment="header" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="top-banner">
+        <img width="1200" height="44" loading="lazy" class="banner-topbar"
+             data-src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/25/28/2528971e6119a5d6b12f5e9b03c11131.png"
+             alt="Banner top bar"
+             src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/25/28/2528971e6119a5d6b12f5e9b03c11131.png">
+    </div>
+
+    <div class="header__top">
+        <div class="header__top-wrap container">
+            <a href="/" class="header__logo" aria-label="logo">
+                <img src="https://cdnv2.tgdd.vn/webmwg/2024/ContentMwg/images/lunar_new_year/2026/TGDD/logo-dt.png" alt="TheGioiDiDong">
+            </a>
+
+            <form action="/products" class="header__search">
+                <input id="skw" type="text" class="input-search" placeholder="Bạn tìm gì..." name="q" autocomplete="off" maxlength="100">
+                <button type="submit" aria-label="button suggest search">
+                    <span class="icon-search"></span>
+                </button>
+                <div id="search-result" style="display: none;"></div>
+            </form>
+            <div class="admin-dropdown" sec:authorize="hasAuthority('ADMIN')">
+                <button class="admin-btn" type="button">Quản lý tài khoản</button>
+                <div class="admin-menu">
+                    <a href="/categories/parents">Quản lý danh mục</a>
+                    <a href="/categories/children">Quản lý thành phần danh mục</a>
+                </div>
+            </div>
+
+            <div class="profile">
+                <div class="profile__auth" sec:authorize="isAnonymous()">
+                    <a href="/login" class="name-order active">
+                        <span class="icon-user"></span> Đăng nhập
+                    </a>
+                    <a href="/register" class="name-order">
+                        Đăng ký
+                    </a>
+                </div>
+                <div class="profile__auth" sec:authorize="isAuthenticated()">
+                    <a href="/order/history" class="name-order active">
+                        <span class="icon-user"></span>
+                        <span sec:authentication="name"></span>
+                    </a>
+                    <form action="/logout" method="post" class="logout-form">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="name-order logout-btn" type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+            </div>
+
+            <a href="/order/checkout" class="header__cart menu-info" id="cart-box" sec:authorize="hasAnyAuthority('USER','ADMIN')">
+                <div class="box-cart">
+                    <span class="icon-cart"></span>
+                    <span class="cart-number" th:text="${cartItemCount}"></span>
+                </div>
+                <span>Giá trị đơn hàng</span>
+            </a>
+
+            <a href="javascript:;" class="header__address" onclick="OpenLocation()">
+                <i class="icon-location"></i>
+                <span>Hồ Chí Minh</span>
+                <div class="remind_location hide">
+                    <div class="remind_question">
+                        Bạn đang ở <b>Hồ Chí Minh</b>?
+                        <p class="remind_change">Sửa</p>
+                    </div>
+                    <p class="remind_content">Giá và khuyến mãi đang áp dụng theo khu vực này.</p>
+                    <div class="remind_btn-close"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="header__main">
+        <div class="container">
+            <ul class="main-menu">
+                <li sec:authorize="!hasAuthority('MANAGER')">
+                    <a href="#">
+                        <i><img src="https://cdn.tgdd.vn/content/phonne-24x24.png" alt="icon Điện thoại"></i>
+                        <span>Điện thoại</span>
+                    </a>
+                </li>
+                <li sec:authorize="!hasAuthority('MANAGER')">
+                    <a href="#">
+                        <i><img src="https://cdn.tgdd.vn/content/laptop-24x24.png" alt="icon Laptop"></i>
+                        <span>Laptop</span>
+                    </a>
+                </li>
+                <li class="has-list" sec:authorize="!hasAuthority('MANAGER')">
+                    <a href="#">
+                        <i><img src="https://cdn.tgdd.vn/content/phu-kien-24x24.png" alt="icon Phụ kiện"></i>
+                        <span class="has-child">Phụ kiện</span>
+                    </a>
+                    <div class="navmwg">
+                        <div class="item-child" th:each="pc : ${parentCategories}">
+                            <strong th:text="${pc.name}"></strong>
+                            <a th:each="c : ${pc.children}" th:href="@{'/products/category/' + ${c.id}}">
+                                <img alt="thumb menu" width="25" th:if="${!#strings.isEmpty(c.imageUrl)}" th:src="${c.imageUrl}">
+                                <h3 th:text="${c.name}"></h3>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <a href="/products">
+                        <i><span class="menu-dot"></span></i>
+                        <span>Sản phẩm</span>
+                    </a>
+                </li>
+                <li sec:authorize="hasAuthority('USER')">
+                    <a href="/rewards/lookup">
+                        <i><span class="menu-dot"></span></i>
+                        <span>Đổi điểm</span>
+                    </a>
+                </li>
+                <li sec:authorize="hasAuthority('ADMIN')">
+                    <a href="/categories/parents">
+                        <i><span class="menu-dot"></span></i>
+                        <span>Danh mục</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="festival-left">
+        <div>
+            <a aria-label="Banner bên trái" href="#">
+                <img loading="lazy"
+                     alt="Banner bên trái"
+                     src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/df/ea/dfea8b798b9581ec14d356fc41a214c5.png">
+            </a>
+        </div>
+    </div>
+    <div class="festival-right">
+        <div>
+            <a aria-label="Banner bên phải" href="#">
+                <img loading="lazy"
+                     alt="Banner bên phải"
+                     src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/df/ea/dfea8b798b9581ec14d356fc41a214c5.png">
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function OpenLocation() {
+            var address = document.querySelector('.header__address');
+            if (!address) return false;
+            var remind = address.querySelector('.remind_location');
+            if (!remind) return false;
+
+            var open = remind.classList.contains('hide');
+            if (open) {
+                remind.style.display = 'block';
+                remind.classList.remove('hide');
+                remind.classList.remove('fade-out');
+
+                setTimeout(function () {
+                    remind.classList.add('fade-out');
+                    setTimeout(function () {
+                        remind.style.display = 'none';
+                        remind.classList.add('hide');
+                        remind.classList.remove('fade-out');
+                    }, 2000);
+                }, 10000);
+            } else {
+                remind.style.display = 'none';
+                remind.classList.add('hide');
+                remind.classList.remove('fade-out');
+            }
+            return false;
+        }
+
+        (function () {
+            var address = document.querySelector('.header__address');
+            if (!address) return;
+            var remind = address.querySelector('.remind_location');
+            if (!remind) return;
+
+            remind.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            var change = address.querySelector('.remind_change');
+            if (change) {
+                change.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    OpenLocation();
+                });
+            }
+
+            var closeBtn = address.querySelector('.remind_btn-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    remind.style.display = 'none';
+                    remind.classList.add('hide');
+                    remind.classList.remove('fade-out');
+                });
+            }
+
+            document.addEventListener('click', function () {
+                remind.style.display = 'none';
+                remind.classList.add('hide');
+                remind.classList.remove('fade-out');
+            });
+        })();
+        (function(){
+            var wrap=document.querySelector('.admin-dropdown');
+            if(!wrap)return;
+            var btn=wrap.querySelector('.admin-btn');
+            var menu=wrap.querySelector('.admin-menu');
+            if(!btn||!menu)return;
+            btn.addEventListener('click',function(e){
+                e.stopPropagation();
+                var show=menu.style.display==='block';
+                menu.style.display= show?'none':'block';
+            });
+            document.addEventListener('click',function(){
+                menu.style.display='none';
+            });
+        })();
+    </script>
+</header>
