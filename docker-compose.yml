@@ -19,7 +19,7 @@ services:
   app:
     build:
       context: .
-    image: phuongdungphan/phuongdungshopweb:latest
+    image: ${DOCKER_IMAGE_NAME:-phuongdungphan/phuongdungshopweb}:latest
     container_name: phuongdungshop-app
     restart: unless-stopped
     depends_on:
@@ -29,9 +29,6 @@ services:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      APP_MAIL_FROM: ${APP_MAIL_FROM}
     ports:
       - "8081:8081"
 

@@ -1,33 +1,43 @@
 # PhuongDungShopWeb
 
-Ung dung Spring Boot ban hang co cau hinh Docker de chay cung MySQL va luu du lieu bang Docker volume.
+Ung dung Spring Boot ban hang, da duoc cau hinh de:
+
+- chay local bang Docker Compose
+- tu dong test tren GitHub Actions
+- build va push Docker image len Docker Hub khi push len nhanh `main`
 
 ## Cong nghe
 
 - Java 21
 - Spring Boot
+- Maven
 - MySQL 8.4
 - Docker
-- Docker Compose
+- GitHub Actions
 
 ## Chay du an bang Docker
 
 ### 1. Tao file `.env`
 
-Tao file `.env` trong thu muc goc cua du an va them noi dung nhu sau:
+Sao chep tu file mau:
 
-```env
-MYSQL_DATABASE=shopweb1
-MYSQL_ROOT_PASSWORD=123456
-SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/shopweb1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
-SPRING_DATASOURCE_USERNAME=root
-SPRING_DATASOURCE_PASSWORD=123456
-
-# Neu du an co gui mail OTP thi them cac bien sau
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-APP_MAIL_FROM=your-email@gmail.com
+```bash
+cp .env.example .env
 ```
+
+Neu ban dang dung Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Sau do sua cac gia tri trong `.env`, dac biet la:
+
+- `MYSQL_ROOT_PASSWORD`
+- `MAIL_USERNAME`
+- `MAIL_PASSWORD`
+- `APP_MAIL_FROM`
+- `DOCKER_IMAGE_NAME`
 
 ### 2. Build va chay container
 
@@ -37,102 +47,109 @@ docker compose up -d --build
 
 ### 3. Truy cap ung dung
 
-Ung dung chay tai:
-
 ```text
 http://localhost:8081
 ```
 
-## Luu tru du lieu bang volume
+## Docker image
 
-Du lieu MySQL duoc luu trong named volume:
+Build image thu cong:
 
-```text
-mysql_data
+```bash
+docker build -t your-dockerhub-username/phuongdungshopweb:latest .
 ```
 
-Volume nay duoc gan vao container database tai:
+Push image len Docker Hub:
 
-```text
-/var/lib/mysql
+```bash
+docker push your-dockerhub-username/phuongdungshopweb:latest
 ```
 
-Vi vay khi xoa container, du lieu van duoc giu lai neu ban chua xoa volume.
+Trong `docker-compose.yml`, ten image dang duoc lay tu bien:
 
-### Lenh kiem tra volume
+```env
+DOCKER_IMAGE_NAME=your-dockerhub-username/phuongdungshopweb
+```
+
+Neu khong dat bien nay, compose se dung mac dinh:
+
+```text
+phuongdungphan/phuongdungshopweb:latest
+```
+
+## GitHub Actions cho du an nay
+
+Workflow nam tai:
+
+```text
+.github/workflows/demo.yml
+```
+
+Pipeline hien tai gom 3 phan:
+
+1. `Maven Test`: chay test voi MySQL service tren GitHub runner
+2. `Docker Build Check`: build image de dam bao `Dockerfile` hop le
+3. `Docker Publish`: push image len Docker Hub khi push vao `main`
+
+### Dieu kien workflow duoc kich hoat
+
+- `pull_request` vao nhanh `main`
+- `push` vao nhanh `main`
+
+### Can cau hinh gi tren GitHub
+
+Vao `Settings -> Secrets and variables -> Actions`, sau do them:
+
+Secrets:
+
+- `DOCKERHUB_USERNAME`: ten dang nhap Docker Hub
+- `DOCKERHUB_TOKEN`: access token cua Docker Hub
+
+Variables:
+
+- `DOCKER_IMAGE_NAME`: vi du `your-dockerhub-username/phuongdungshopweb`
+
+### Cach tao Docker Hub access token
+
+1. Dang nhap Docker Hub
+2. Vao `Account Settings -> Personal access tokens`
+3. Tao token moi
+4. Luu token vao GitHub secret `DOCKERHUB_TOKEN`
+
+### Ket qua sau khi cau hinh xong
+
+- Tao pull request: GitHub se tu dong chay test va build Docker
+- Push len `main`: GitHub se test, build image, roi push len Docker Hub
+
+## Mot so lenh huu ich
+
+Xem log:
+
+```bash
+docker compose logs -f
+```
+
+Dung container:
+
+```bash
+docker compose down
+```
+
+Xoa ca container va volume:
+
+```bash
+docker compose down -v
+```
+
+Kiem tra volume:
 
 ```bash
 docker volume ls
 docker volume inspect phanthiphuongdung_2280600393_mysql_data
 ```
 
-## Dung image public tu Docker Hub
-
-Neu ban da push image len Docker Hub public, sua `docker-compose.yml` nhu sau:
-
-```yaml
-app:
-  image: YOUR_DOCKERHUB_USERNAME/phuongdungshopweb:latest
-```
-
-Sau do chay:
-
-```bash
-docker compose up -d
-```
-
-## Cach push len Docker Hub
-
-### 1. Dang nhap Docker Hub
-
-```bash
-docker login
-```
-
-### 2. Build image
-
-```bash
-docker build -t YOUR_DOCKERHUB_USERNAME/phuongdungshopweb:latest .
-```
-
-### 3. Push image
-
-```bash
-docker push YOUR_DOCKERHUB_USERNAME/phuongdungshopweb:latest
-```
-
-### 4. Dat repository o che do Public
-
-Tren Docker Hub, hay dat repository thanh `Public` de moi nguoi co the tim thay va pull image.
-
-## Mot so lenh huu ich
-
-### Xem log
-
-```bash
-docker compose logs -f
-```
-
-### Dung container
-
-```bash
-docker compose down
-```
-
-### Dung container nhung giu du lieu
-
-```bash
-docker compose down
-```
-
-### Xoa ca container va volume
-
-```bash
-docker compose down -v
-```
-
 ## Luu y bao mat
 
-- Khong commit file `.env` len GitHub.
-- Khong dua mat khau database hoac app password email vao source code.
-- Neu public image, hay truyen secret qua bien moi truong.
+- Khong commit file `.env` len GitHub
+- Khong dua password database hoac mail token vao source code
+- Nen dung Docker Hub access token thay vi password

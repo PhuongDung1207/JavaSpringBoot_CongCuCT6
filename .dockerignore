@@ -1,6 +1,10 @@
 .git
+.github
 .idea
+.mvn/wrapper/maven-wrapper.jar
 .vscode
 target
 *.log
 .env
+.m2
+README.md

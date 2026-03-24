@@ -1,7 +1,11 @@
 FROM maven:3.9.11-eclipse-temurin-21 AS builder
 WORKDIR /app
-COPY . .
-RUN mvn package -DskipTests
+
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+
+COPY src src
+RUN mvn -B clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
