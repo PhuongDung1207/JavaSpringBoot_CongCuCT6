@@ -123,7 +123,7 @@ jobs:
           
       - name: Triển khai lên DevOps Classroom
         run: |
-          REPO="repository/docker"
+          REPO="phuongdungphan/phuongdungshopweb"
           CONTAINER_PORT=81
           RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest&slot=1&container_port=$CONTAINER_PORT&strict_container_port=0")
           BODY=$(echo "$RESPONSE" | sed "$d")
